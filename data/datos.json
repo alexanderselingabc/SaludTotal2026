@@ -16,10 +16,112 @@
 		},
 		{
 			"id": 3,
+			"nombre": "Dra. Ana Torres",
+			"email": "ana@saludtotal.com",
+			"password": "1234",
+			"rol": "medico"
+		},
+		{
+			"id": 4,
 			"nombre": "Alexander Seling",
 			"email": "admin@saludtotal.com",
 			"password": "1234",
 			"rol": "admin"
+		}
+	],
+	"medicos": [
+		{
+			"id": 1,
+			"nombre": "Dra. Gómez",
+			"especialidad": "Clínica Médica"
+		},
+		{
+			"id": 2,
+			"nombre": "Dr. Pérez",
+			"especialidad": "Cardiología"
+		},
+		{
+			"id": 3,
+			"nombre": "Dra. Fernández",
+			"especialidad": "Pediatría"
+		},
+		{
+			"id": 4,
+			"nombre": "Dra. Ana Torres",
+			"especialidad": "Traumatología"
+		}
+	],
+	"turnos": [
+		{
+			"id": 1,
+			"pacienteId": 1,
+			"medicoId": 1,
+			"especialidad": "Clínica Médica",
+			"fecha": "2026-09-15",
+			"hora": "10:00",
+			"estado": "Confirmado"
+		},
+		{
+			"id": 2,
+			"pacienteId": 2,
+			"medicoId": 2,
+			"especialidad": "Cardiología",
+			"fecha": "2026-09-21",
+			"hora": "09:30",
+			"estado": "Confirmado"
+		},
+		{
+			"id": 3,
+			"pacienteId": 1,
+			"medicoId": 2,
+			"especialidad": "Cardiología",
+			"fecha": "2026-12-21",
+			"hora": "09:30",
+			"estado": "Pendiente"
+		},
+		{
+			"id": 4,
+			"pacienteId": 2,
+			"medicoId": 3,
+			"especialidad": "Pediatría",
+			"fecha": "2026-09-04",
+			"hora": "16:00",
+			"estado": "Reprogramado"
+		},
+		{
+			"id": 5,
+			"pacienteId": 2,
+			"medicoId": 4,
+			"especialidad": "Traumatología",
+			"fecha": "2026-09-28",
+			"hora": "11:30",
+			"estado": "Confirmado"
+		}
+	],
+	"especialidades": [
+		{
+			"nombre": "Clínica médica",
+			"descripcion": "Atención médica general, diagnóstico y seguimiento de pacientes."
+		},
+		{
+			"nombre": "Cardiología",
+			"descripcion": "Prevención, diagnóstico y tratamiento de enfermedades cardiovasculares."
+		},
+		{
+			"nombre": "Dermatología",
+			"descripcion": "Diagnóstico y tratamiento de enfermedades de la piel."
+		},
+		{
+			"nombre": "Pediatría",
+			"descripcion": "Atención integral de niños y adolescentes."
+		},
+		{
+			"nombre": "Traumatología",
+			"descripcion": "Diagnóstico y tratamiento de lesiones y enfermedades del sistema musculoesquelético."
+		},
+		{
+			"nombre": "Oftalmología",
+			"descripcion": "Prevención, diagnóstico y tratamiento de enfermedades de la visión."
 		}
 	]
 }

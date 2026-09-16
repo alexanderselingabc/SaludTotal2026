@@ -15,18 +15,20 @@
 		<img src="../images/logo_robado.png" alt="Logo Clínica SaludTotal">
 		<h1>Portal del Paciente</h1>
 		<p>Clínica SaludTotal</p>
+		<h3 id="bienvenida">Bienvenido paciente</h3>
 	</header>
 
 	<nav>
 		<ul>
 			<li><a href="../index.html">Inicio</a></li>
-			<li class="paciente"><a href="solicitar-turno.html">Solicitar Turno</a></li>
 			<li class="paciente"><a href="mis-turnos.html">Mis Turnos</a></li>
 			<li class="paciente"><a href="historial.html">Historial Clínico</a></li>
 			<li class="paciente"><a href="resultados.html">Resultados</a></li>
-			<!-- <li class="visitante"><a href="login.html">Iniciar sesión</a></li> -->
+			<li class="visitante paciente"><a href="solicitar-turno.html">Solicitar Turno</a></li>
 			<li class="visitante"><a href="signup.html">Crear usuario</a></li>
+			<li class="visitante"><a href="login.html">Iniciar sesión</a></li>
 			<li class="admin"><a href="statistics.html">Estadisticas</a></li>
+			<li class="admin paciente"><a href="login.html" onclick="desconectar()"> Desconectar </a></li>
 		</ul>
 	</nav>
 
@@ -36,7 +38,7 @@
 
 			<h2>Solicitar un nuevo turno</h2>
 
-			<form action="confirmacion.html">
+			<form id="form-turno">
 
 				<p>
 					<label for="especialidad">Especialidad</label><br>

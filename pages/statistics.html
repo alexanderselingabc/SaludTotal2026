@@ -15,49 +15,28 @@
 		<img src="../images/logo_robado.png" alt="Logo Clínica SaludTotal">
 		<h1>Portal del Paciente</h1>
 		<p>Clínica SaludTotal</p>
+		<h3 id="bienvenida">Bienvenido admin</h3>
 	</header>
 
 	<nav>
 		<ul>
 			<li><a href="../index.html">Inicio</a></li>
-			<li class="paciente"><a href="solicitar-turno.html">Solicitar Turno</a></li>
 			<li class="paciente"><a href="mis-turnos.html">Mis Turnos</a></li>
 			<li class="paciente"><a href="historial.html">Historial Clínico</a></li>
 			<li class="paciente"><a href="resultados.html">Resultados</a></li>
-			<!-- <li class="visitante"><a href="login.html">Iniciar sesión</a></li> -->
+			<li class="visitante paciente"><a href="solicitar-turno.html">Solicitar Turno</a></li>
 			<li class="visitante"><a href="signup.html">Crear usuario</a></li>
+			<li class="visitante"><a href="login.html">Iniciar sesión</a></li>
 			<li class="admin"><a href="statistics.html">Estadisticas</a></li>
+			<li class="admin paciente"><a href="login.html" onclick="desconectar()"> Desconectar </a></li>
 		</ul>
 	</nav>
 	<main>
 
 		<section>
 
-			<h2>Historial Clínico</h2>
-
-			<article>
-
-				<h3>Consulta clínica</h3>
-
-				<p><strong>Fecha:</strong> 12/06/2026</p>
-
-				<p><strong>Diagnóstico:</strong> Gripe estacional.</p>
-
-				<p><strong>Tratamiento:</strong> Reposo e hidratación.</p>
-
-			</article>
-
-			<article>
-
-				<h3>Consulta cardiológica</h3>
-
-				<p><strong>Fecha:</strong> 20/07/2026</p>
-
-				<p><strong>Diagnóstico:</strong> Control de rutina.</p>
-
-				<p><strong>Tratamiento:</strong> Sin observaciones.</p>
-
-			</article>
+			<h2>Estadísticas del sistema</h2>
+			<div id="estadisticas"></div>
 
 		</section>
 
