@@ -1,174 +1,27 @@
 const STORAGE_KEY = "portalPacienteData";
 const SESSION_KEY = "portalPacienteUsuario";
 
-function resolveUrl(path) {
-	const isInsidePages = window.location.pathname.includes("/pages/");
-	return isInsidePages ? `../${path}` : path;
-}
-
-function getDataUrl() {
-	return window.location.pathname.includes("/pages/") ? "../data/datos.json" : "data/datos.json";
-}
-
-const DATA_FALLBACK = { usuarios: [], medicos: [], turnos: [], especialidades: [] };
+// ============================================================
+// DATOS
+// ============================================================
 
 async function obtenerDatos() {
-
 	const datosGuardados = localStorage.getItem(STORAGE_KEY);
 
 	if (datosGuardados) {
-		try {
-			return JSON.parse(datosGuardados);
-		} catch (error) {
-			localStorage.removeItem(STORAGE_KEY);
-		}
+		return JSON.parse(datosGuardados);
 	}
 
-	try {
-		const respuesta = await fetch(getDataUrl());
+	const ruta = window.location.pathname.includes("/pages/")
+		? "../data/datos.json"
+		: "data/datos.json";
 
-		if (!respuesta.ok) {
-			throw new Error("No se pudo cargar JSON");
-		}
-
+	const respuesta = await fetch(ruta);
 		const datos = await respuesta.json();
 
 		guardarDatos(datos);
 
 		return datos;
-
-	} catch (error) {
-		console.error("No se pudieron cargar los datos:", error);
-		return DATA_FALLBACK;
-	}
-}
-
-async function renderizarEspecialidadesHome() {
-
-	const lista = document.querySelector("#lista-especialidades");
-	if (!lista) return;
-
-	const datos = await obtenerDatos();
-
-	for (const especialidad of datos.especialidades) {
-
-		const article = document.createElement("article");
-
-		article.innerHTML = `
-			<h3>${especialidad.nombre}</h3>
-			<p>${especialidad.descripcion}</p>
-		`;
-
-		lista.append(article);
-	}
-}
-
-
-
-
-
-
-
-async function renderizarTurnosPaciente() {
-
-	const contenedor = document.querySelector("#turnos-container");
-	if (!contenedor) return;
-
-	const usuario = obtenerUsuarioActual();
-	if (!usuario || usuario.rol !== "paciente") {
-		window.location.href = "../pages/login.html";
-		return;
-	}
-
-	const datos = await obtenerDatos();
-	const turnos = datos.turnos.filter(turno => turno.pacienteId === usuario.id).reverse();
-
-	if (!turnos.length) {
-		contenedor.innerHTML = '<tr><td colspan="6">Todavía no tenés turnos registrados.</td></tr>';
-		return;
-	}
-
-	contenedor.innerHTML = turnos.map(turno => {
-		const medico = datos.medicos.find(item => item.id === turno.medicoId);
-
-		return `
-			<tr>
-				<td>${turno.fecha}</td>
-				<td>${turno.hora}</td>
-				<td>${turno.especialidad}</td>
-				<td>${medico ? medico.nombre : "Sin medico"}</td>
-				<td>${turno.estado}</td>
-				<td><button class="danger" type="button">Cancelar</button></td>
-				<td><button type="button">Reprogramar</button></td>
-			</tr>
-		`;
-	}).join("");
-}
-
-async function renderizarEstadisticasMedico() {
-	const contenedor = document.querySelector("#estadisticas");
-	if (!contenedor) return;
-
-	const usuario = obtenerUsuarioActual();
-	if (!usuario || !["admin", "medico"].includes(usuario.rol)) {
-		window.location.href = resolveUrl("index.html");
-		return;
-	}
-
-	const datos = await obtenerDatos();
-	const totalTurnos = datos.turnos.length;
-	const pendientes = datos.turnos.filter(turno => turno.estado === "Pendiente").length;
-	const confirmados = datos.turnos.filter(turno => turno.estado === "Confirmado").length;
-
-	contenedor.innerHTML = `
-		<ul>
-			<li>Total de turnos: ${totalTurnos}</li>
-			<li>Pendientes: ${pendientes}</li>
-			<li>Confirmados: ${confirmados}</li>
-		</ul>
-		<table>
-			<tr><th>Paciente</th><th>Especialidad</th><th>Fecha</th><th>Estado</th></tr>
-			${datos.turnos.map(turno => {
-		const paciente = datos.usuarios.find(usuarioActual => usuarioActual.id === turno.pacienteId);
-		return `<tr><td>${paciente ? paciente.nombre : "Paciente"}</td><td>${turno.especialidad}</td><td>${turno.fecha}</td><td>${turno.estado}</td></tr>`;
-	}).join("")}
-		</table>
-	`;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function normalizarRol(rol) {
-	return rol === "medico" ? "admin" : rol;
 }
 
 
@@ -176,41 +29,48 @@ function guardarDatos(datos) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
 }
 
+
+// ============================================================
+// SESIÓN
+// ============================================================
+
 function obtenerUsuarioActual() {
-	const usuarioGuardado = localStorage.getItem(SESSION_KEY);
-	if (!usuarioGuardado) {
-		return null;
-	}
+	const usuario = localStorage.getItem(SESSION_KEY);
 
-	try {
-		return JSON.parse(usuarioGuardado);
-	} catch (error) {
-		localStorage.removeItem(SESSION_KEY);
-		return null;
-	}
-}
-
-function desconectar() {
-	localStorage.removeItem(SESSION_KEY);
+	return usuario ? JSON.parse(usuario) : null;
 }
 
 function guardarUsuarioActual(usuario) {
 	localStorage.setItem(SESSION_KEY, JSON.stringify(usuario));
 }
 
+function desconectar() {
+	localStorage.removeItem(SESSION_KEY);
+}
+
+function normalizarRol(rol) {
+	return rol === "medico" ? "admin" : rol;
+}
+
+
+// ============================================================
+// LOGIN
+// ============================================================
+
 async function buscarUsuario(email, password) {
 
-	const data = await obtenerDatos();
+	const datos = await obtenerDatos();
 
-	return data.usuarios.find(usuario =>
+	return datos.usuarios.find(usuario =>
 		usuario.email.toLowerCase() === email.toLowerCase() &&
 		usuario.password === password
 	);
 }
 
 function cerrarSesion() {
+	//esta funciona se llama directamente desde HTML.
 	localStorage.removeItem(SESSION_KEY);
-	window.location.href = resolveUrl("index.html");
+	window.location.href = resolverUrl("index.html");
 }
 
 async function iniciarSesion(event) {
@@ -233,8 +93,11 @@ async function iniciarSesion(event) {
 	}
 
 	guardarUsuarioActual(usuario);
-	const destino = normalizarRol(usuario.rol) === "admin" ? "pages/statistics.html" : "index.html";
-	window.location.href = resolveUrl(destino);
+
+	const destino = normalizarRol(usuario.rol) === "admin"
+		? "pages/statistics.html"
+		: "index.html";
+	window.location.href = resolverUrl(destino);
 }
 
 
@@ -245,15 +108,79 @@ function asignarLoginAlFormulario() {
 	}
 }
 
+
+// ============================================================
+// INTERFAZ
+// ============================================================
+
+function actualizarInterfaz(usuario) {
+
+	const elementos = document.querySelectorAll(".paciente, .admin, .visitante");
+
+	elementos.forEach(elemento => {
+		elemento.style.display = "none";
+	});
+
+	const clase = usuario ? normalizarRol(usuario.rol) : "visitante";
+	
+	document.querySelectorAll(`.${clase}`).forEach(elemento => {
+		elemento.style.display = "list-item";
+	});
+
+	const bienvenida = document.querySelector("#bienvenida");
+
+	if (bienvenida) {
+		bienvenida.textContent = usuario
+			? `Bienvenid@ ${usuario.nombre}`
+			: "Bienvenido visitante";
+	}
+}
+
+
+// ============================================================
+// PÁGINA PRINCIPAL
+// ============================================================
+
+async function renderizarEspecialidadesHome() {
+
+	const lista = document.querySelector("#lista-especialidades");
+	if (!lista) return;
+
+	const datos = await obtenerDatos();
+
+	for (const especialidad of datos.especialidades) {
+		const article = document.createElement("article");
+
+		article.innerHTML = `
+			<h3>${especialidad.nombre}</h3>
+			<p>${especialidad.descripcion}</p>
+		`;
+
+		lista.append(article);
+	}
+}
+
+
+// ============================================================
+// TURNOS
+// ============================================================
+
 async function poblarSelectoresTurno() {
 	const datos = await obtenerDatos();
 	const selectMedico = document.querySelector("#medico");
-	if (selectMedico) {
-		selectMedico.innerHTML = datos.medicos.map(medico => {
-			return `<option value="${medico.id}">${medico.nombre} - ${medico.especialidad}</option>`;
-		}).join("");
-	}
+
+	if (!selectMedico) return;
+
+	selectMedico.innerHTML = "";
+	datos.medicos.forEach(medico => {
+		selectMedico.innerHTML += `
+			<option value="${medico.id}">
+				${medico.nombre} - ${medico.especialidad}
+			</option>
+		`;
+	});
 }
+
 async function registrarNuevoTurno(event) {
 	event.preventDefault();
 	const usuario = obtenerUsuarioActual();
@@ -288,9 +215,114 @@ async function registrarNuevoTurno(event) {
 	window.location.href = "confirmacion.html";
 }
 
+async function renderizarTurnosPaciente() {
+
+	const contenedor = document.querySelector("#turnos-container");
+
+	if (!contenedor) return;
+
+	const usuario = obtenerUsuarioActual();
+	if (!usuario || usuario.rol !== "paciente") {
+		window.location.href = "../pages/login.html";
+		return;
+	}
+
+	const datos = await obtenerDatos();
+
+	const turnos = datos.turnos
+		.filter(turno => turno.pacienteId === usuario.id)
+		.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+	// en clase habíamos puesto .reverse() solamente para que los ultimos turnos aparezcan arriba, pero es mas correcto ordenarlos segun la fecha con sort() y pasando como funcion el criterio de ordenamiento
 
 
+	if (!turnos.length) {
+		contenedor.innerHTML = '<tr><td colspan="6">Todavía no tenés turnos registrados.</td></tr>';
+		return;
+	}
 
+	contenedor.innerHTML = turnos.map(turno => {
+		const medico = datos.medicos.find(
+			medico => medico.id === turno.medicoId
+		);
+
+		return `<tr>
+				<td>${turno.fecha}</td>
+				<td>${turno.hora}</td>
+				<td>${turno.especialidad}</td>
+			<td>${medico ? medico.nombre : "Sin médico"}</td>
+				<td>${turno.estado}</td>
+			<td>
+				<button class="danger" type="button">Cancelar</button>
+			</td>
+			<td>
+				<button type="button">Reprogramar</button>
+			</td>
+		</tr>`;
+	}).join("");
+}
+
+
+// ============================================================
+// ADMIN.ESTADÍSTICAS
+// ============================================================
+
+
+async function renderizarEstadisticasMedico() {
+	const contenedor = document.querySelector("#estadisticas");
+	if (!contenedor) return;
+
+	const usuario = obtenerUsuarioActual();
+	if (!usuario || !["admin", "medico"].includes(usuario.rol)) {
+		window.location.href = resolverUrl("index.html");
+		return;
+	}
+
+	const datos = await obtenerDatos();
+	const totalTurnos = datos.turnos.length;
+	const pendientes = datos.turnos.filter(turno => turno.estado === "Pendiente").length;
+	const confirmados = datos.turnos.filter(turno => turno.estado === "Confirmado").length;
+
+	contenedor.innerHTML = `
+		<ul>
+			<li>Total de turnos: ${totalTurnos}</li>
+			<li>Pendientes: ${pendientes}</li>
+			<li>Confirmados: ${confirmados}</li>
+		</ul>
+		<table>
+		<tr>
+			<th>Paciente</th>
+			<th>Especialidad</th>
+			<th>Fecha</th>
+			<th>Estado</th>
+		</tr>
+
+			${datos.turnos.map(turno => {
+		const paciente = datos.usuarios.find(
+			usuario => usuario.id === turno.pacienteId
+		);
+
+		return `<tr>
+			<td>${paciente ? paciente.nombre : "Paciente"}</td>
+			<td>${turno.especialidad}</td>
+			<td>${turno.fecha}</td>
+			<td>${turno.estado}</td>
+		</tr>`;
+	}).join("")}
+		</table>
+	`;
+}
+
+
+// ============================================================
+// CONTROL DE ACCESO
+// ============================================================
+
+
+function resolverUrl(path) {
+	const dentroDePages = window.location.pathname.includes("/pages/");
+	return dentroDePages ? `../${path}` : path;
+}
 
 function protegerPaginaPorRol() {
 
@@ -315,7 +347,7 @@ function protegerPaginaPorRol() {
 			paginasPaciente.includes(pagina) ||
 			paginasAdmin.includes(pagina)
 		) {
-			window.location.href = resolveUrl("pages/login.html");
+			window.location.href = resolverUrl("pages/login.html");
 		}
 
 		return;
@@ -324,36 +356,19 @@ function protegerPaginaPorRol() {
 	const rol = normalizarRol(usuario.rol);
 
 	if (paginasPaciente.includes(pagina) && rol !== "paciente") {
-		window.location.href = resolveUrl("index.html");
+		window.location.href = resolverUrl("index.html");
 		return;
 	}
 
 	if (paginasAdmin.includes(pagina) && rol !== "admin") {
-		window.location.href = resolveUrl("index.html");
-	}
-}
-function actualizarInterfaz(usuario) {
-
-	const elementos = document.querySelectorAll(".paciente, .admin, .visitante");
-
-	elementos.forEach(elemento => {
-		elemento.style.display = "none";
-	});
-
-	const clase = usuario ? normalizarRol(usuario.rol) : "visitante";
-	document.querySelectorAll(`.${clase}`).forEach(elemento => {
-		elemento.style.display = "list-item";
-	});
-
-	const bienvenida = document.querySelector("#bienvenida");
-
-	if (bienvenida) {
-		bienvenida.textContent = usuario
-			? `Bienvenid@ ${usuario.nombre}`
-			: "Bienvenido visitante";
+		window.location.href = resolverUrl("index.html");
 	}
 }
 
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
 
 async function inicializarApp() {
 
@@ -388,4 +403,4 @@ async function inicializarApp() {
 
 protegerPaginaPorRol();
 
-window.addEventListener("DOMContentLoaded", inicializarApp);
+inicializarApp()
