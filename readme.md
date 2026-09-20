@@ -4,7 +4,7 @@
 
 **Portal del Paciente** para la **Clínica SaludTotal**.
 
-Este proyecto corresponde al desarrollo de un prototipo web navegable realizado como parte del Hito 2 de la asignatura Prácticas Profesionalizantes I.
+Este proyecto corresponde al desarrollo de un prototipo web dínamica realizado como parte del Hito 3 de la asignatura Prácticas Profesionalizantes I.
 
 ---
 
@@ -27,7 +27,9 @@ El Portal del Paciente es una aplicación web destinada a mejorar la comunicaci�
 
 El sistema permitirá gestionar turnos médicos, consultar el historial clínico y acceder a los resultados de estudios y análisis de manera rápida y segura.
 
-En esta primera versión se desarrolló un prototipo navegable utilizando únicamente HTML5 y CSS, simulando las principales funcionalidades del sistema.
+Prototipo 1: En esta primera versión se desarrolló un prototipo navegable utilizando únicamente HTML5 y CSS, simulando las principales funcionalidades del sistema.
+
+Prototipo 2: Se eliminan datos hardcodeados de html. Se incorpora el uso de javascript y json para carga inicial. Se utiliza localStorage para comunicación entre pantallas.
 
 ---
 
@@ -37,6 +39,9 @@ En esta primera versión se desarrolló un prototipo navegable utilizando única
 - CSS3
 - Git
 - GitHub
+- JavaScript localStorage, libreria JSON
+- createElement
+- Arrays, objetos
 
 ---
 
@@ -51,14 +56,28 @@ portal-paciente/
 ├── css/
 │   └── styles.css
 │
+├── js/
+│   └── scripts.js
+│
+├── data/
+│   └── datos.json
+│
+├── documentacion/
+│   ├── Hito01 - Consignas.pdf
+│   ├── Hito02 - Consignas.pdf
+│   └── Hito03 - Consignas.pdf
+│
 ├── img/
 │
 └── pages/
-    ├── solicitar-turno.html
     ├── confirmacion.html
-    ├── mis-turnos.html
     ├── historial.html
-    └── resultados.html
+    ├── login.html
+    ├── mis-turnos.html
+    ├── resultados.html
+    ├── signup.html
+    ├── solicitar-turno.html
+    └── statistics.html
 ```
 
 ---
@@ -67,52 +86,47 @@ portal-paciente/
 
 ### Inicio
 
-Presenta el Portal del Paciente y permite acceder a todas las funcionalidades mediante un menú de navegación.
+Presenta la aplicación y permite acceder a todas las funcionalidades mediante un menú de navegación. Pensada para el usuario visitante.
 
 ### Solicitar Turno
 
-Contiene un formulario HTML para simular la solicitud de un turno médico.
+Contiene un formulario HTML para simular la solicitud de un turno médico. Pensado para usuario con rol Paciente.
 
 ### Confirmación
 
-Simula el resultado exitoso del envío del formulario indicando que el turno fue solicitado correctamente.
+Simula el resultado exitoso del envío del formulario indicando que el turno fue solicitado correctamente. Pensado para usuario con rol Paciente.
 
 ### Mis Turnos
 
-Muestra un listado de turnos registrados junto con su estado.
+Muestra un listado de turnos registrados junto con su estado. Pensado para usuario con rol Paciente.
 
 ### Historial Clínico
 
-Presenta información simulada correspondiente al historial médico del paciente.
+Presenta información simulada correspondiente al historial médico del paciente. Pensado para usuario con rol Paciente.
 
 ### Resultados de Análisis
 
-Permite visualizar estudios disponibles y simula la descarga de resultados.
+Permite visualizar estudios disponibles y simula la descarga de resultados. Pensado para usuario con rol Paciente.
 
----
+### Estadisticas
 
-## Funcionalidades previstas para la próxima entrega
+Permite visualizar algunos datos básicos como cantidad de pacientes registrados, pensados para la vista del usuario con rol Administrador.
 
-En la siguiente versión del sistema se prevé incorporar:
+### Login
 
-- Validación de formularios.
-- Programación con JavaScript.
-- Persistencia de datos.
-- Integración con un servidor backend.
-- Gestión de usuarios e inicio de sesión.
-- Consulta dinámica de turnos disponibles.
-- Integración con el Sistema de Gestión Hospitalaria (SGH).
-- Integración con el Sistema de Gestión de Laboratorios.
-- Envío automático de notificaciones.
-- Mejoras de diseño y experiencia de usuario.
+Permite iniciar sesión como paciente u administrador, según rol definido en ``data/datos.json``.
+
+### SignUp
+
+Permite crear una nueva cuenta como paciente. Sólo lo almacena en la localStorage.
 
 ---
 
 ## Estado del proyecto
 
-🚧 Prototipo navegable en desarrollo.
+🚧 Prototipo dínamico navegable en desarrollo.
 
-Esta versión representa únicamente una simulación de la interfaz del sistema y no implementa lógica de negocio ni conexión con bases de datos.
+Esta versión representa únicamente una simulación de la interfaz del sistema y no implementa lógica de negocio ni conexión real a una base de datos.
 
 ---
 
