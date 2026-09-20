@@ -14,17 +14,24 @@ function guardarUsuarioActual(usuario) {
 }
 
 async function obtenerDatosGlobales() {
-	const datosGuardados = localStorage.getItem(STORAGE_KEY);
-	if (datosGuardados) {
-		return JSON.parse(datosGuardados);
-	}
-	const ruta = resolverUrlRelativa("data/datos.json")
+	// Mejora: combinamos datos del local storage con los del json
+	const ruta = resolverUrlRelativa("data/datos.json");
 	const respuesta = await fetch(ruta);
-	const datos = await respuesta.json();
+	const datosIniciales = await respuesta.json();
 
-	guardarDatosGlobales(datos);
+	const datosGuardados = localStorage.getItem(STORAGE_KEY);
 
-	return datos;
+	if (!datosGuardados) {
+		guardarDatosGlobales(datosIniciales);
+		return datosIniciales;
+	}
+
+	const datosGuardadosParseados = JSON.parse(datosGuardados);
+
+	return {
+		...datosIniciales,
+		...datosGuardadosParseados
+	};
 }
 
 function obtenerUsuarioActual() {
@@ -219,6 +226,37 @@ async function renderizarPageNuevoTurno() {
 // ============================================================
 // PANTALLAS: PACIENTE - MIS TURNOS
 // ============================================================
+async function renderizarPageResultados(usuario) {
+
+	const contenedor = document.querySelector("#tabla_de_resultados");
+	if (!contenedor) return;
+
+	if (!usuario || usuario.rol !== "paciente") {
+		window.location.href = resolverUrlRelativa("pages/login.html");
+		return;
+	}
+	const datos = await obtenerDatosGlobales();
+	const resultados = datos.resultados.filter(resultado => resultado.pacienteId === usuario.id).sort(resultado => resultado.fecha);
+
+	if (!resultados.length) {
+		contenedor.innerHTML = '<tr><td colspan="6">Todavía no tenés resultados registrados.</td></tr>';
+		return;
+	}
+	function resultadoAResultadoPaciente(resultado) {
+		console.log(resultado)
+		console.log(datos.medicos)
+		const medico = datos.medicos.find(medico => medico.id === resultado.medicoId);
+		return `<tr>
+			<td>${resultado.tipo}</td>
+			<td>${resultado.fecha}</td>
+			<td>${medico?.nombre}</td>
+			<td>${resultado.estado == true ? "Disponible" : "No disponible"}</td>
+			<td> <button>Ver detalles</button> </td>
+		</tr>`;
+	}
+	contenedor.innerHTML = resultados.map(resultadoAResultadoPaciente).join("");
+}
+
 
 async function renderizarPageMisTurnos(usuario) {
 	const contenedor = document.querySelector("#turnos-container");
@@ -249,17 +287,13 @@ async function renderizarPageMisTurnos(usuario) {
 		);
 
 		return `<tr>
-				<td>${turno.fecha}</td>
-				<td>${turno.hora}</td>
-				<td>${turno.especialidad}</td>
+			<td>${turno.fecha}</td>
+			<td>${turno.hora}</td>
+			<td>${turno.especialidad}</td>
 			<td>${medico ? medico.nombre : "Sin médico"}</td>
-				<td>${turno.estado}</td>
-			<td>
-				<button class="danger" type="button">Cancelar</button>
-			</td>
-			<td>
-				<button type="button">Reprogramar</button>
-			</td>
+			<td>${turno.estado}</td>
+			<td> <button class="danger" type="button">Cancelar</button> </td>
+			<td> <button type="button">Reprogramar</button> </td>
 		</tr>`;
 	}
 
@@ -357,6 +391,10 @@ async function inicializarApp() {
 
 	else if (pagina === "mis-turnos.html") {
 		await renderizarPageMisTurnos(usuario);
+	}
+
+	else if (pagina === "resultados.html") {
+		await renderizarPageResultados(usuario);
 	}
 
 	else if (pagina === "statistics.html") {

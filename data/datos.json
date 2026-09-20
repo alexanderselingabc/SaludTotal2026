@@ -1,4 +1,41 @@
 {
+	"resultados": [
+		{
+			"tipo": "Análisis de sangre",
+			"fecha": "08/07/2026",
+			"estado": true,
+			"pacienteId": 1,
+			"medicoId": 2
+		},
+		{
+			"tipo": "Radiografia",
+			"fecha": "18/07/2026",
+			"estado": false,
+			"pacienteId": 2,
+			"medicoId": 1
+		},
+		{
+			"tipo": "Resonancia magnéticaiografia",
+			"fecha": "18/06/2026",
+			"estado": true,
+			"pacienteId": 2,
+			"medicoId": 4
+		},
+		{
+			"tipo": "Radiografia",
+			"fecha": "18/07/2026",
+			"estado": false,
+			"pacienteId": 1,
+			"medicoId": 3
+		},
+		{
+			"tipo": "Resonancia magnéticaiografia",
+			"fecha": "18/06/2026",
+			"estado": true,
+			"pacienteId": 2,
+			"medicoId": 4
+		}
+	],
 	"usuarios": [
 		{
 			"id": 1,
@@ -33,7 +70,8 @@
 		{
 			"id": 1,
 			"nombre": "Dra. Gómez",
-			"especialidad": "Clínica Médica"
+			"especialidad": "Clínica Médica",
+			"matricula": "5643543"
 		},
 		{
 			"id": 2,
