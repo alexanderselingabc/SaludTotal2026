@@ -1,6 +1,7 @@
 {
 	"resultados": [
 		{
+			"id": 1,
 			"tipo": "Análisis de sangre",
 			"fecha": "08/07/2026",
 			"estado": true,
@@ -8,6 +9,7 @@
 			"medicoId": 2
 		},
 		{
+			"id": 2,
 			"tipo": "Radiografia",
 			"fecha": "18/07/2026",
 			"estado": false,
@@ -15,6 +17,7 @@
 			"medicoId": 1
 		},
 		{
+			"id": 3,
 			"tipo": "Resonancia magnéticaiografia",
 			"fecha": "18/06/2026",
 			"estado": true,
@@ -22,6 +25,7 @@
 			"medicoId": 4
 		},
 		{
+			"id": 4,
 			"tipo": "Radiografia",
 			"fecha": "18/07/2026",
 			"estado": false,
@@ -29,6 +33,7 @@
 			"medicoId": 3
 		},
 		{
+			"id": 5,
 			"tipo": "Resonancia magnéticaiografia",
 			"fecha": "18/06/2026",
 			"estado": true,
@@ -138,26 +143,32 @@
 	],
 	"especialidades": [
 		{
+			"id": 1,
 			"nombre": "Clínica médica",
 			"descripcion": "Atención médica general, diagnóstico y seguimiento de pacientes."
 		},
 		{
+			"id": 2,
 			"nombre": "Cardiología",
 			"descripcion": "Prevención, diagnóstico y tratamiento de enfermedades cardiovasculares."
 		},
 		{
+			"id": 3,
 			"nombre": "Dermatología",
 			"descripcion": "Diagnóstico y tratamiento de enfermedades de la piel."
 		},
 		{
+			"id": 4,
 			"nombre": "Pediatría",
 			"descripcion": "Atención integral de niños y adolescentes."
 		},
 		{
+			"id": 5,
 			"nombre": "Traumatología",
 			"descripcion": "Diagnóstico y tratamiento de lesiones y enfermedades del sistema musculoesquelético."
 		},
 		{
+			"id": 6,
 			"nombre": "Oftalmología",
 			"descripcion": "Prevención, diagnóstico y tratamiento de enfermedades de la visión."
 		}
