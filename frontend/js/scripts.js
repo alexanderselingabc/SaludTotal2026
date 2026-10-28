@@ -4,6 +4,8 @@
 
 const STORAGE_KEY = "portalPacienteData";
 const SESSION_KEY = "portalPacienteUsuario";
+const API_URL = "https://saludtotal-backend-d2g6.onrender.com/";
+
 
 function guardarDatosGlobales(datos) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
@@ -12,6 +14,28 @@ function guardarDatosGlobales(datos) {
 function guardarUsuarioActual(usuario) {
 	localStorage.setItem(SESSION_KEY, JSON.stringify(usuario));
 }
+
+async function obtenerTurnos() {
+	const respuesta = await fetch(`${API_URL}/api/turnos`);
+
+	if (!respuesta.ok) {
+		throw new Error("Error al obtener los turnos");
+	}
+
+	return await respuesta.json();
+}
+
+async function obtenerUsuarios() {
+	const respuesta = await fetch(`${API_URL}/api/usuarios`);
+
+	if (!respuesta.ok) {
+		throw new Error("Error al obtener los usuarios");
+	}
+
+	return await respuesta.json();
+}
+
+
 
 async function obtenerDatosGlobales() {
 	// Mejora: combinamos datos del local storage con los del json
@@ -312,13 +336,18 @@ async function renderizarPageEstadisticas(usuario) {
 		window.location.href = resolverUrlRelativa("index.html");
 		return;
 	}
-	const datos = await obtenerDatosGlobales();
-	const totalTurnos = datos.turnos.length;
-	const pendientes = datos.turnos.filter(turno => turno.estado === "Pendiente").length;
-	const confirmados = datos.turnos.filter(turno => turno.estado === "Confirmado").length;
+
+	const turnos = await obtenerTurnos();
+	const usuarios = await obtenerUsuarios();
+
+
+	// const datos = await obtenerDatosGlobales();
+	const totalTurnos = turnos.length;
+	const pendientes = turnos.filter(turno => turno.estado === "Pendiente").length;
+	const confirmados = turnos.filter(turno => turno.estado === "Confirmado").length;
 
 	function turnoAFilaDeEstadisticas(turno) {
-		const paciente = datos.usuarios.find(
+		const paciente = usuarios.find(
 			usuario => usuario.id === turno.pacienteId
 		);
 
