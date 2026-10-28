@@ -36,6 +36,21 @@ async function obtenerUsuarios() {
 }
 
 
+async function obtenerEspecialidadesDeMiApi() {
+
+	const respuesta = await fetch(`${API_URL}/api/especialidades`);
+
+	if (!respuesta.ok) {
+		throw new Error("Error al obtener los usuarios");
+	}
+
+	return await respuesta.json();
+
+}
+
+
+
+
 
 async function obtenerDatosGlobales() {
 	// Mejora: combinamos datos del local storage con los del json
@@ -209,9 +224,12 @@ async function renderizarPageHome() {
 	const lista = document.querySelector("#lista-especialidades");
 	if (!lista) return;
 
-	const datos = await obtenerDatosGlobales();
+	// const datos = await obtenerDatosGlobales();
 
-	for (const especialidad of datos.especialidades) {
+	const especialidades = await obtenerEspecialidadesDeMiApi();
+
+
+	for (const especialidad of especialidades) {
 		const article = document.createElement("article");
 
 		article.innerHTML = `
