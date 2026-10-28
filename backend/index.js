@@ -1,138 +1,317 @@
-const express = require('express');
+
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;;
+const PORT = process.env.PORT || 3000;
 
-// Middleware para interpretar JSON en el body
+// --------------------------------------------------
+// MIDDLEWARES
+// --------------------------------------------------
+
+app.use(cors());
 app.use(express.json());
 
-// Base de datos en memoria
-const productos = [
-	{ id: 1, nombre: 'Café con leche', precio: 1800, categoria: 'bebida' },
-	{ id: 2, nombre: 'Medialuna', precio: 900, categoria: 'comida' },
-	{ id: 3, nombre: 'Tostado de jamón y queso', precio: 3500, categoria: 'comida' },
-	{ id: 4, nombre: 'Agua mineral', precio: 1200, categoria: 'bebida' }
-];
+// --------------------------------------------------
+// DATOS
+// --------------------------------------------------
 
-// GET / - Bienvenida
-app.get('/', (req, res) => {
-	res.send('API de la Cafetería del CRUI funcionando');
-});
+const rutaDatos = path.join(__dirname, "data", "datos.json");
 
-// GET /api/productos - Listar productos
-// GET /api/productos?categoria=bebida
-// La consulta sin filtro devuelve todos los productos.
-app.get('/api/productos', (req, res) => {
-	const categoria = req.query.categoria;
-	if (!categoria) {
-		return res.json(productos);
-	} else {
-		res.json(productos.filter(p => p.categoria === categoria));
+const datos = JSON.parse(
+	fs.readFileSync(rutaDatos, "utf8")
+);
+
+// --------------------------------------------------
+// UTILIDADES
+// --------------------------------------------------
+
+const colecciones_disponibles = Object.keys(datos);
+
+
+function buscarColeccion(nombre) {
+	if (!colecciones_disponibles.includes(nombre)) {
+		return null;
 	}
+
+	return datos[nombre];
+}
+
+function siguienteId(coleccion) {
+	return coleccion.length
+		? Math.max(...coleccion.map(item => item.id)) + 1
+		: 1;
+}
+
+// Nunca devolvemos las contraseñas al consultar usuarios.
+function respuestaPublica(coleccion, recurso) {
+	if (coleccion === "usuarios") {
+		const { password, ...usuarioPublico } = recurso;
+		return usuarioPublico;
+	}
+
+	return recurso;
+}
+
+function esObjetoValido(valor) {
+	return valor !== null &&
+		typeof valor === "object" &&
+		!Array.isArray(valor);
+}
+
+// --------------------------------------------------
+// RUTA DE PRUEBA
+// --------------------------------------------------
+
+app.get("/", (req, res) => {
+	res.json({
+		mensaje: "API de SaludTotal funcionando",
+		colecciones: colecciones_disponibles
+	});
 });
 
-// GET /api/productos/:id - Buscar por ID
-app.get('/api/productos/:id', (req, res) => {
-	const id = Number(req.params.id);
-	const producto = productos.find(p => p.id === id);
+// --------------------------------------------------
+// LOGIN DE DEMOSTRACIÓN
+// --------------------------------------------------
 
-	if (!producto) {
+app.post("/api/login", (req, res) => {
+	const { email, password } = req.body;
+
+	if (
+		typeof email !== "string" ||
+		typeof password !== "string" ||
+		!email.trim() ||
+		!password
+	) {
+		return res.status(400).json({
+			error: "Email y contraseña son obligatorios"
+		});
+	}
+
+	const usuario = datos.usuarios.find(item =>
+		item.email.toLowerCase() === email.trim().toLowerCase() &&
+		item.password === password
+	);
+
+	if (!usuario) {
+		return res.status(401).json({
+			error: "Usuario o contraseña incorrectos"
+		});
+	}
+
+	res.json(respuestaPublica("usuarios", usuario));
+});
+
+// --------------------------------------------------
+// GET: LISTAR RECURSOS
+// GET /api/turnos
+// --------------------------------------------------
+
+app.get("/api/:coleccion", (req, res) => {
+	const coleccion = buscarColeccion(req.params.coleccion);
+
+	if (!coleccion) {
 		return res.status(404).json({
-			error: 'Producto no encontrado'
+			error: "Colección no encontrada"
 		});
 	}
 
-	res.json(producto);
+	res.json(
+		coleccion.map(item =>
+			respuestaPublica(req.params.coleccion, item)
+		)
+	);
 });
 
-// POST /api/productos - Agregar producto
-app.post('/api/productos', (req, res) => {
-	const { nombre, precio, categoria } = req.body;
+// --------------------------------------------------
+// GET: OBTENER UN RECURSO
+// GET /api/turnos/1
+// --------------------------------------------------
 
-	// Validaciones
-	if (typeof nombre !== 'string' || nombre.trim() === '') {
-		return res.status(400).json({
-			error: 'El nombre es obligatorio'
+app.get("/api/:coleccion/:id", (req, res) => {
+	const nombre = req.params.coleccion;
+	const coleccion = buscarColeccion(nombre);
+
+	if (!coleccion) {
+		return res.status(404).json({
+			error: "Colección no encontrada"
 		});
 	}
 
-	if (typeof precio !== 'number' || precio <= 0 || !Number.isFinite(precio)) {
+	const id = Number(req.params.id);
+
+	if (!Number.isInteger(id) || id < 1) {
 		return res.status(400).json({
-			error: 'El precio debe ser un número mayor a 0'
+			error: "El ID debe ser un entero positivo"
 		});
 	}
 
-	// Crear producto
-	const ultimoProducto = productos[productos.length - 1];
-	const nuevoProducto = {
-		id: ultimoProducto ? ultimoProducto.id + 1 : 1,
-		nombre: nombre.trim(),
-		precio,
-		categoria
+	const recurso = coleccion.find(item => item.id === id);
+
+	if (!recurso) {
+		return res.status(404).json({
+			error: "Recurso no encontrado"
+		});
+	}
+
+	res.json(respuestaPublica(nombre, recurso));
+});
+
+// --------------------------------------------------
+// POST: CREAR UN RECURSO
+// POST /api/turnos
+// --------------------------------------------------
+
+app.post("/api/:coleccion", (req, res) => {
+	const nombre = req.params.coleccion;
+	const coleccion = buscarColeccion(nombre);
+
+	if (!coleccion) {
+		return res.status(404).json({
+			error: "Colección no encontrada"
+		});
+	}
+
+	if (!esObjetoValido(req.body)) {
+		return res.status(400).json({
+			error: "El cuerpo debe ser un objeto JSON"
+		});
+	}
+
+	if (req.body.id !== undefined) {
+		return res.status(400).json({
+			error: "El ID lo genera el servidor"
+		});
+	}
+
+	if (nombre === "usuarios" &&
+		(typeof req.body.password !== "string" ||
+			!req.body.password)) {
+		return res.status(400).json({
+			error: "La contraseña es obligatoria"
+		});
+	}
+
+	const nuevoRecurso = {
+		...req.body,
+		id: siguienteId(coleccion)
 	};
 
-	productos.push(nuevoProducto);
+	coleccion.push(nuevoRecurso);
 
-	res.status(201).json(nuevoProducto);
+	res.status(201).json(
+		respuestaPublica(nombre, nuevoRecurso)
+	);
 });
 
-// Bonus 2: DELETE /api/productos/:id
-app.delete('/api/productos/:id', (req, res) => {
+// --------------------------------------------------
+// PUT: REEMPLAZAR UN RECURSO
+// PUT /api/turnos/1
+// --------------------------------------------------
+
+app.put("/api/:coleccion/:id", (req, res) => {
+	const nombre = req.params.coleccion;
+	const coleccion = buscarColeccion(nombre);
+
+	if (!coleccion) {
+		return res.status(404).json({
+			error: "Colección no encontrada"
+		});
+	}
+
 	const id = Number(req.params.id);
-	const indice = productos.findIndex(p => p.id === id);
+
+	if (!Number.isInteger(id) || id < 1) {
+		return res.status(400).json({
+			error: "El ID debe ser un entero positivo"
+		});
+	}
+
+	if (!esObjetoValido(req.body)) {
+		return res.status(400).json({
+			error: "El cuerpo debe ser un objeto JSON"
+		});
+	}
+
+	if (req.body.id !== undefined &&
+		req.body.id !== id) {
+		return res.status(400).json({
+			error: "El ID del cuerpo no coincide con la URL"
+		});
+	}
+
+	const indice = coleccion.findIndex(item => item.id === id);
 
 	if (indice === -1) {
 		return res.status(404).json({
-			error: 'Producto no encontrado'
+			error: "Recurso no encontrado"
 		});
 	}
 
-	const eliminado = productos.splice(indice, 1)[0];
-	res.json(eliminado);
+	if (nombre === "usuarios") {
+		const password = req.body.password ??
+			coleccion[indice].password;
+
+		if (typeof password !== "string" || !password) {
+			return res.status(400).json({
+				error: "La contraseña no puede estar vacía"
+			});
+		}
+
+		req.body.password = password;
+	}
+
+	const recursoActualizado = {
+		...req.body,
+		id
+	};
+
+	coleccion[indice] = recursoActualizado;
+
+	res.json(respuestaPublica(nombre, recursoActualizado));
 });
 
-// Bonus 3: GET /api/resumen
-app.get('/api/resumen', (req, res) => {
-	const cantidad = productos.length;
-	const suma = productos.reduce((total, p) => total + p.precio, 0);
-	const precioPromedio = cantidad > 0 ? suma / cantidad : 0;
+// --------------------------------------------------
+// DELETE: ELIMINAR UN RECURSO
+// DELETE /api/turnos/1
+// --------------------------------------------------
 
-	res.json({ cantidad, precioPromedio });
-});
+app.delete("/api/:coleccion/:id", (req, res) => {
+	const coleccion = buscarColeccion(req.params.coleccion);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-	console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
-
-
-
-app.put('/api/productos/:id', (req, res) => {
-	const id = Number(req.params.id);
-	const { nombre, precio, categoria } = req.body;
-
-	const producto = productos.find(p => p.id === id);
-
-	if (!producto) {
+	if (!coleccion) {
 		return res.status(404).json({
-			error: 'Producto no encontrado'
+			error: "Colección no encontrada"
 		});
 	}
 
-	if (
-		!nombre ||
-		typeof precio !== 'number' ||
-		precio <= 0 ||
-		!categoria
-	) {
+	const id = Number(req.params.id);
+
+	if (!Number.isInteger(id) || id < 1) {
 		return res.status(400).json({
-			error: 'Datos inválidos. Se requiere nombre, precio mayor a cero y categoría.'
+			error: "El ID debe ser un entero positivo"
 		});
 	}
 
-	producto.nombre = nombre;
-	producto.precio = precio;
-	producto.categoria = categoria;
+	const indice = coleccion.findIndex(item => item.id === id);
 
-	res.status(200).json(producto);
+	if (indice === -1) {
+		return res.status(404).json({
+			error: "Recurso no encontrado"
+		});
+	}
+
+	coleccion.splice(indice, 1);
+
+	res.status(204).end();
+});
+
+// --------------------------------------------------
+// INICIAR SERVIDOR
+// --------------------------------------------------
+
+app.listen(PORT, () => {
+	console.log(`API escuchando en el puerto ${PORT}`);
 });
