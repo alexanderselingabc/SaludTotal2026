@@ -1,0 +1,20 @@
+services:
+  # Frontend estático
+  - type: web
+    name: saludtotal-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: echo "Frontend estático listo"
+    staticPublishPath: .
+    envVars:
+      - key: BACKEND_URL
+        value: https://saludtotal-backend.onrender.com
+
+  # Backend Node.js / Express
+  - type: web
+    name: saludtotal-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
