@@ -4,7 +4,7 @@
 
 const STORAGE_KEY = "portalPacienteData";
 const SESSION_KEY = "portalPacienteUsuario";
-const API_URL = "https://saludtotal-backend-d2g6.onrender.com/";
+const API_URL = "https://saludtotal-backend-d2g6.onrender.com";
 
 
 function guardarDatosGlobales(datos) {
@@ -372,7 +372,7 @@ async function renderizarPageEstadisticas(usuario) {
 			<th>Fecha</th>
 			<th>Estado</th>
 		</tr>
-			${datos.turnos.map(turnoAFilaDeEstadisticas).join("")}
+			${turnos.map(turnoAFilaDeEstadisticas).join("")}
 		</table>
 	`;
 }
