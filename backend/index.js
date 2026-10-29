@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 // MIDDLEWARES
 // --------------------------------------------------
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 // --------------------------------------------------
@@ -129,6 +129,45 @@ app.get("/api/:coleccion", (req, res) => {
 // GET: OBTENER UN RECURSO
 // GET /api/turnos/1
 // --------------------------------------------------
+
+
+
+
+
+
+
+
+
+app.get("/api/turnos_por_paciente/:id", (req, res) => {
+	const id = Number(req.params.id);
+
+	if (!Number.isInteger(id) || id < 1) {
+		return res.status(400).json({
+			error: "El ID debe ser un entero positivo"
+		});
+	}
+
+	const recurso = datos.turnos.find(item => item.pacienteId === id);
+
+	if (!recurso) {
+		return res.status(404).json({
+			error: "Recurso no encontrado"
+		});
+	}
+
+	res.json(respuestaPublica(nombre, recurso));
+});
+
+
+
+
+
+
+
+
+
+
+
 
 app.get("/api/:coleccion/:id", (req, res) => {
 	const nombre = req.params.coleccion;
